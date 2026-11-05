@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RSVP — Mariage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+SC:wght@400;500&family=Pinyon+Script&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ead6cf;
+    --card: #f6e8e2;
+    --ink: #3b3232;
+    --muted: #7d6a66;
+    --accent: #9a7440;
+    --accent-soft: #efdcd3;
+    --burgundy: #8c3a47;
+    --line: #dcc3b8;
+    --error: #b44a3c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 400;
+    font-size: 17px;
+    background-image: radial-gradient(circle at 15% 10%, rgba(140,58,71,.10), transparent 40%), radial-gradient(circle at 85% 90%, rgba(140,58,71,.08), transparent 40%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .card {
+    width: 100%;
+    max-width: 520px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    outline: 1px solid var(--line);
+    outline-offset: -12px;
+    border-radius: 2px;
+    padding: 52px 44px;
+    text-align: center;
+    box-shadow: 0 24px 60px -30px rgba(90, 40, 40, .35);
+    position: relative;
+  }
+  .card::before, .card::after {
+    content: "❦";
+    position: absolute;
+    color: var(--burgundy);
+    opacity: .55;
+    font-size: 26px;
+  }
+  .card::before { top: 18px; left: 22px; transform: rotate(-30deg); }
+  .card::after { bottom: 18px; right: 22px; transform: rotate(150deg); }
+  .bismillah {
+    font-family: "Amiri", serif;
+    font-size: 26px;
+    margin: 6px 0 18px;
+    color: var(--ink);
+  }
+  .families {
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+    font-family: "Cormorant SC", serif; font-size: 18px; letter-spacing: .06em;
+  }
+  .families em {
+    display: block; font-family: "Pinyon Script", cursive; font-style: normal;
+    font-size: 24px; letter-spacing: 0; color: var(--ink); margin-top: 2px;
+  }
+  .families .and { font-family: "Pinyon Script", cursive; font-size: 22px; color: var(--accent); }
+  .announce {
+    font-family: "Cormorant SC", serif; font-size: 14px; letter-spacing: .08em;
+    margin: 18px 0 8px; line-height: 1.5;
+  }
+  .when {
+    font-size: 30px; letter-spacing: .08em; margin: 14px 0 2px;
+  }
+  .when span { color: var(--line); margin: 0 6px; }
+  .hour { font-size: 20px; margin: 0; }
+  .venue {
+    font-family: "Cormorant SC", serif; font-size: 15px; line-height: 1.5; margin: 14px 0 0;
+  }
+  .venue a { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--muted); }
+  .kicker {
+    font-family: "Pinyon Script", cursive;
+    font-size: 26px;
+    color: var(--ink);
+    margin: 0;
+  }
+  h1 {
+    font-family: "Pinyon Script", cursive;
+    font-weight: 400;
+    font-size: 56px;
+    line-height: 1.15;
+    margin: 18px 0 0;
+    color: var(--accent);
+    background: linear-gradient(180deg, #b8904f, #8a6532);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .intro {
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.6;
+    margin: 4px 0 26px;
+  }
+  .divider {
+    width: 48px; height: 1px; background: var(--accent);
+    margin: 26px auto;
+  }
+  form { text-align: left; }
+  label.field-label {
+    display: block;
+    font-family: "Cormorant SC", serif;
+    font-size: 15px;
+    letter-spacing: .08em;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .field { margin-bottom: 24px; }
+  input[type="text"] {
+    width: 100%;
+    font: inherit;
+    font-size: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    background: #fffaf7;
+    color: var(--ink);
+  }
+  input[type="text"]:focus { outline: none; border-color: var(--accent); }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice input { position: absolute; opacity: 0; pointer-events: none; }
+  .choice span {
+    display: block;
+    text-align: center;
+    padding: 14px 10px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all .15s;
+    background: #fffaf7;
+    font-size: 17px;
+  }
+  .choice input:checked + span {
+    border-color: var(--burgundy);
+    background: var(--accent-soft);
+    color: var(--burgundy);
+    font-weight: 500;
+  }
+  .choice input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .counts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stepper {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--line); border-radius: 3px; background: #fffaf7;
+  }
+  .stepper button {
+    width: 44px; height: 46px; border: 0; background: none;
+    font-size: 22px; color: var(--burgundy); cursor: pointer;
+  }
+  .stepper button:disabled { color: var(--line); cursor: default; }
+  .stepper output { font-size: 18px; font-weight: 400; min-width: 24px; text-align: center; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 6px; }
+  #counts-block { transition: opacity .2s; }
+  #counts-block[hidden] { display: none; }
+  .hp { position: absolute; left: -9999px; }
+  button.submit {
+    width: 100%;
+    font: inherit;
+    font-family: "Cormorant SC", serif;
+    font-size: 17px;
+    letter-spacing: .12em;
+    padding: 15px;
+    border: 0;
+    border-radius: 2px;
+    background: var(--burgundy);
+    color: #fff;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  button.submit:hover { background: #722c38; }
+  button.submit:disabled { opacity: .6; cursor: wait; }
+  .error { color: var(--error); font-size: 14px; margin: 12px 0 0; min-height: 1em; text-align: center; }
+  .deadline { font-size: 15px; font-style: italic; color: var(--muted); text-align: center; margin-top: 20px; }
+  .thanks h2 {
+    font-family: "Pinyon Script", cursive; font-weight: 400; font-size: 40px; color: var(--accent); margin: 0 0 12px;
+  }
+  .thanks p { color: var(--muted); line-height: 1.6; margin: 0; }
+  .thanks a { color: var(--burgundy); font-size: 14px; display: inline-block; margin-top: 22px; cursor: pointer; }
+  @media (max-width: 480px) {
+    .card { padding: 36px 22px; }
+    h1 { font-size: 44px; }
+    .families { font-size: 15px; }
+    .families em { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<main class="card">
+  <p class="kicker">Save the Date</p>
+  <p class="bismillah" lang="ar" dir="rtl">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+  <div class="families">
+    <div>La famille <em id="fam1"></em></div>
+    <div class="and">&amp;</div>
+    <div>La famille <em id="fam2"></em></div>
+  </div>
+  <p class="announce">ont le plaisir de vous faire part du mariage<br>de leurs enfants</p>
+  <h1 id="names"></h1>
+  <p class="when" id="date"></p>
+  <p class="hour" id="hour"></p>
+  <p class="venue" id="venue"></p>
+  <div class="divider"></div>
+
+  <div id="form-view">
+    <p class="intro" id="intro"></p>
+
+    <form id="rsvp" novalidate>
+      <div class="field">
+        <label class="field-label" for="nom">Nom & prénom</label>
+        <input type="text" id="nom" name="nom" autocomplete="name" placeholder="Ex. Famille Benali" required>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Serez-vous présent·e ?</label>
+        <div class="choices">
+          <label class="choice"><input type="radio" name="presence" value="Oui"><span>Avec joie</span></label>
+          <label class="choice"><input type="radio" name="presence" value="Non"><span>Malheureusement non</span></label>
+        </div>
+      </div>
+
+      <div class="field" id="counts-block" hidden>
+        <label class="field-label">Combien serez-vous ?</label>
+        <div class="counts">
+          <div>
+            <div class="stepper" data-target="adultes" data-min="1">
+              <button type="button" data-step="-1" aria-label="Retirer un adulte">−</button>
+              <output id="adultes-out">1</output>
+              <button type="button" data-step="1" aria-label="Ajouter un adulte">+</button>
+            </div>
+            <div class="hint">Adultes</div>
+          </div>
+          <div>
+            <div class="stepper" data-target="enfants" data-min="0">
+              <button type="button" data-step="-1" aria-label="Retirer un enfant">−</button>
+              <output id="enfants-out">0</output>
+              <button type="button" data-step="1" aria-label="Ajouter un enfant">+</button>
+            </div>
+            <div class="hint">Enfants</div>
+          </div>
+        </div>
+        <input type="hidden" name="adultes" id="adultes" value="1">
+        <input type="hidden" name="enfants" id="enfants" value="0">
+      </div>
+
+      <!-- anti-spam : champ invisible, doit rester vide -->
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <button type="submit" class="submit" id="submit-btn">Envoyer ma réponse</button>
+      <p class="error" id="error" role="alert"></p>
+    </form>
+
+    <p class="deadline" id="deadline"></p>
+  </div>
+
+  <div id="thanks-view" class="thanks" hidden>
+    <div class="divider"></div>
+    <h2 id="thanks-title"></h2>
+    <p id="thanks-text"></p>
+    <a id="again">Envoyer une autre réponse</a>
+  </div>
+</main>
+
+<script>
+/* =========================================================
+   CONFIG — tout ce qui est modifiable est ici
+   ========================================================= */
+const CONFIG = {
+  names: ["Nosaïba", "Yassine"],
+  families: ["Ettaj", "Jamaleddine"],
+  date: ["26", "12", "26"],
+  hour: "20h00",
+  venue: ["Salle La Tonnelle Prestige", "8 avenue de l'Europe", "95400 Villiers-le-Bel"],
+  intro: "Merci de nous confirmer votre présence",
+  deadline: "Réponse souhaitée avant le 10 décembre 2026",
+  maxAdultes: 10,
+  maxEnfants: 10,
+  // URL de l'application Web Apps Script (voir LISEZMOI) :
+  scriptUrl: "https://script.google.com/macros/s/AKfycby6jrNFHsAC7KbD6u0I9sghV0eGigaZiBl4KR_NlZ4DlLb-h-syNEUUm12EyZv9-zsC/exec",
+  thanksYes: { title: "Merci !", text: "Nous avons hâte de célébrer ce jour avec vous, le 26 décembre." },
+  thanksNo:  { title: "Merci de nous avoir prévenus", text: "Vous nous manquerez, nous penserons à vous." }
+};
+
+/* ========================================================= */
+const $ = (id) => document.getElementById(id);
+
+$("names").textContent = `${CONFIG.names[0]} & ${CONFIG.names[1]}`;
+$("fam1").textContent = CONFIG.families[0];
+$("fam2").textContent = CONFIG.families[1];
+$("date").innerHTML = CONFIG.date.join("<span>|</span>");
+$("hour").textContent = `— ${CONFIG.hour} —`;
+const mapsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(CONFIG.venue.join(", "));
+$("venue").innerHTML = `<a href="${mapsUrl}" target="_blank" rel="noopener">${CONFIG.venue.join("<br>")}</a>`;
+$("intro").textContent = CONFIG.intro;
+$("deadline").textContent = CONFIG.deadline;
+$("deadline").hidden = !CONFIG.deadline;
+document.title = `RSVP — ${CONFIG.names[0]} & ${CONFIG.names[1]}`;
+
+const form = $("rsvp");
+const countsBlock = $("counts-block");
+const limits = { adultes: CONFIG.maxAdultes, enfants: CONFIG.maxEnfants };
+
+// Afficher les compteurs seulement si "Oui"
+form.querySelectorAll('input[name="presence"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    countsBlock.hidden = form.presence.value !== "Oui";
+    $("error").textContent = "";
+  })
+);
+
+// Steppers adultes / enfants
+function refreshStepper(stepper) {
+  const key = stepper.dataset.target;
+  const min = Number(stepper.dataset.min);
+  const val = Number($(key).value);
+  $(key + "-out").textContent = val;
+  stepper.querySelector('[data-step="-1"]').disabled = val <= min;
+  stepper.querySelector('[data-step="1"]').disabled = val >= limits[key];
+}
+document.querySelectorAll(".stepper").forEach((stepper) => {
+  stepper.addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const key = stepper.dataset.target;
+    const min = Number(stepper.dataset.min);
+    const next = Math.min(limits[key], Math.max(min, Number($(key).value) + Number(btn.dataset.step)));
+    $(key).value = next;
+    refreshStepper(stepper);
+  });
+  refreshStepper(stepper);
+});
+
+// Envoi
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("error");
+  err.textContent = "";
+
+  const nom = form.nom.value.trim();
+  const presence = form.presence.value;
+  if (!nom) { err.textContent = "Merci d'indiquer votre nom."; form.nom.focus(); return; }
+  if (!presence) { err.textContent = "Merci d'indiquer si vous serez présent·e."; return; }
+  if (form.website.value) return; // bot
+
+  const data = new URLSearchParams({
+    nom,
+    presence,
+    adultes: presence === "Oui" ? form.adultes.value : "0",
+    enfants: presence === "Oui" ? form.enfants.value : "0",
+  });
+
+  const btn = $("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Envoi…";
+
+  try {
+    if (CONFIG.scriptUrl.startsWith("COLLER")) throw new Error("scriptUrl non configurée");
+    // no-cors : Apps Script ne renvoie pas les en-têtes CORS ; la requête arrive quand même.
+    await fetch(CONFIG.scriptUrl, { method: "POST", mode: "no-cors", body: data });
+    const t = presence === "Oui" ? CONFIG.thanksYes : CONFIG.thanksNo;
+    $("thanks-title").textContent = t.title;
+    $("thanks-text").textContent = t.text;
+    $("form-view").hidden = true;
+    $("thanks-view").hidden = false;
+  } catch (ex) {
+    console.error(ex);
+    err.textContent = "Oups, l'envoi n'a pas fonctionné. Vérifiez votre connexion et réessayez.";
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Envoyer ma réponse";
+  }
+});
+
+$("again").addEventListener("click", () => {
+  form.reset();
+  $("adultes").value = 1; $("enfants").value = 0;
+  document.querySelectorAll(".stepper").forEach(refreshStepper);
+  countsBlock.hidden = true;
+  $("thanks-view").hidden = true;
+  $("form-view").hidden = false;
+});
+</script>
+</body>
+</html>
